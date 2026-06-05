@@ -24,9 +24,14 @@ Feature: Create wallet
 
   @web
   Scenario: As a user, I can create a new wallet
-    #Given test@greenstand.org is registered in the system
+    Given I am on the register page
+    When I fill in the registration form with [random user name]@greenstand.org password: Abcde123$
+    And I click on the register button
+    Then I should see a confirmation message
     Given I am on the login page
-    And I login with an account
+    And I login with the registered account
     And I am on the wallet page
     When I create a new wallet
     Then I should see my new wallet in the list of wallets
+    When I click on the wallet to view its details
+    Then I should see there are 1 tokens in my wallet as gift by system for creating wallet for the first time

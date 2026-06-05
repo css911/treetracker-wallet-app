@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Box, Button, Typography, Stack, IconButton } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import AddIcon from "@mui/icons-material/Add";
@@ -10,6 +11,7 @@ import WalletCreateDrawer from "@/components/WalletCreateDrawer";
 import { useCreateWallet, useGetWallets, Wallet } from "@treetracker/wallet";
 
 export default function WalletPage() {
+  const router = useRouter();
   const [wallets, setWallets] = useState<Wallet[]>([]);
 
   const { wallets: serverWallets, isWalletLoading, error } = useGetWallets();
@@ -87,7 +89,15 @@ export default function WalletPage() {
 
       <Stack spacing={0.5} data-test="wallet-list">
         {wallets.map((wallet, idx) => (
-          <div key={idx} data-test={`wallet-list-item-${idx}`}>
+          <div
+            key={idx}
+            data-test={`wallet-list-item-${idx}`}
+            style={{ cursor: "pointer" }}
+            onClick={() =>
+              router.push(
+                `/wallet/details?name=${encodeURIComponent(wallet.name)}`,
+              )
+            }>
             <WalletItem {...(wallet as Wallet)} />
           </div>
         ))}

@@ -21,6 +21,10 @@ const stepState: Record<string, string> = {
   walletName: "", // We need unique walletName for each test, so we use a global state object to share the walletName between steps
 };
 
+// Credentials of a user registered earlier in the scenario, shared across steps.
+let registeredUsername = "";
+let registeredPassword = "";
+
 // Map page names to routes
 const routes: Record<string, string> = {
   login: "login",
@@ -130,6 +134,10 @@ When(
       timeout: 10000,
     });
 
+    // Remember the credentials so a later step can log in as this fresh user.
+    registeredUsername = username;
+    registeredPassword = password;
+
     // Set values on the actual input elements
     await $('[data-test="signup-username"] input').setValue(username);
     await $('[data-test="signup-email"] input').setValue(email);
@@ -209,3 +217,49 @@ When("I create a new wallet", async () => {
   await $('[data-test="wallet-create-description"] input').setValue("desc");
   await $('[data-test="wallet-create-submit"]').click();
 });
+
+// Log in as the user registered earlier in the scenario (fresh user → first wallet).
+When("I login with the registered account", async () => {
+  await browser.execute(() => sessionStorage.clear());
+  await $('input[name="username"]').setValue(registeredUsername);
+  await $('input[name="password"]').setValue(registeredPassword);
+  await $('button[type="submit"]').click();
+  await expect($("[data-test=navigation-home]")).toExist();
+});
+
+// Click the wallet in the list → navigate to its details page (basic info + token list).
+When(/^I click on the wallet to view its details$/, async () => {
+  await $(`[data-test=wallet-item-name-${stepState.walletName}]`).click();
+  await $("[data-test=wallet-details-page]").waitForDisplayed({
+    timeout: 15000,
+  });
+  await $("[data-test=token-list]").waitForDisplayed({ timeout: 15000 });
+});
+
+// Verify by counting the tokens listed on the details page. Reload to re-fetch
+// while the just-gifted token becomes visible.
+Then(
+  /^I should see there are (\d+) tokens in my wallet/,
+  async (count: string) => {
+    const expected = Number(count);
+    // Reload and re-fetch getTokens repeatedly until the just-gifted token is
+    // visible (the count can lag briefly, more so under parallel load). Crucially,
+    // wait after each reload so getTokens finishes fetching+rendering before counting.
+    await browser.waitUntil(
+      async () => {
+        await browser.refresh();
+        if (!(await $("[data-test=token-list]").isDisplayed())) return false;
+        await browser.pause(2500); // let getTokens fetch + render post-reload
+        const n: number = await browser.execute(
+          () => document.querySelectorAll("[data-test^='token-item-']").length,
+        );
+        return n === expected;
+      },
+      {
+        timeout: 90000,
+        interval: 1000,
+        timeoutMsg: `Expected ${expected} token(s) in wallet "${stepState.walletName}"`,
+      },
+    );
+  },
+);
