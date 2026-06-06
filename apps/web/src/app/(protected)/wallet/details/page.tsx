@@ -2,21 +2,14 @@
 
 import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import {
-  Box,
-  Typography,
-  Stack,
-  Paper,
-  Button,
-  Divider,
-} from "@mui/material";
+import { Box, Typography, Stack, Paper, Button, Divider } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useGetTokens } from "@treetracker/wallet";
 
 function WalletDetails() {
   const params = useSearchParams();
   const router = useRouter();
-  const name = params.get("name") ?? "";
+  const name = params?.get("name") ?? "";
 
   const { tokens, isTokensLoading, error } = useGetTokens(name);
 
@@ -27,7 +20,8 @@ function WalletDetails() {
         startIcon={<ArrowBackIcon />}
         onClick={() => router.push("/wallet")}
         sx={{ color: "green" }}
-        data-test="wallet-details-back">
+        data-test="wallet-details-back"
+      >
         Back
       </Button>
 
@@ -38,7 +32,8 @@ function WalletDetails() {
       <Typography
         variant="body2"
         color="text.secondary"
-        data-test="wallet-details-balance">
+        data-test="wallet-details-balance"
+      >
         Token balance: {tokens.length}
       </Typography>
 
