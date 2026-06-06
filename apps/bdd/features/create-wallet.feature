@@ -28,8 +28,6 @@ Feature: Create wallet
     When I fill in the registration form with [random user name]@greenstand.org password: Abcde123$
     And I click on the register button
     Then I should see a confirmation message
-    Given I am on the login page
-    And I login with the registered account
     And I am on the wallet page
     When I create a new wallet
     Then I should see my new wallet in the list of wallets

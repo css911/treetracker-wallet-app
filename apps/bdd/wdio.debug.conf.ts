@@ -158,13 +158,13 @@ export const config: WebdriverIO.Config = {
     // Pause (headed) on the wallet DETAILS page so the browser can be inspected
     // manually — check the token list and the GET /tokens request in DevTools.
     const stepText = (_step as { text?: string })?.text ?? "";
-    if (/view its details/i.test(stepText)) {
-      const pauseMs = Number(process.env.BDD_PAUSE_AFTER_CREATE_MS ?? 0);
+    if (/register button/i.test(stepText)) {
+      const pauseMs = Number(process.env.BDD_PAUSE_AFTER_CREATE_MS ?? 1800000);
       if (pauseMs > 0) {
         console.log(
-          `\n⏸  On wallet details page — pausing ${Math.round(
+          `\n⏸  Just submitted the Keycloak register form — pausing ${Math.round(
             pauseMs / 1000,
-          )}s. Inspect the token list + DevTools → Network (GET /tokens). Ctrl+C to stop.\n`,
+          )}s. Inspect what Keycloak shows (logged-in redirect? verify-email? error?). Ctrl+C to stop.\n`,
         );
         await browser.pause(pauseMs);
       }
