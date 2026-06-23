@@ -52,29 +52,14 @@ describe("WalletCreateDrawer Component", () => {
     getNameInput().type("   ");
     getCreateBtn().should("be.disabled");
 
-    getNameInput().clear().type("My-Wallet");
+    getNameInput().clear().type("My Wallet");
     getCreateBtn().should("not.be.disabled");
-  });
-
-  it("rejects wallet names containing unsupported characters", () => {
-    mountDrawer();
-
-    getNameInput().type("My Wallet");
-    getErrorHelper().should(
-      "contain.text",
-      "Wallet name can only contain letters, numbers, and the - . @ symbols.",
-    );
-    getCreateBtn().should("be.disabled");
-
-    getNameInput().clear().type("My_Wallet");
-    getErrorHelper().should("be.visible");
-    getCreateBtn().should("be.disabled");
   });
 
   it("calls onCreate with trimmed payload, then calls onClose", () => {
     const { onCreate, onClose } = mountDrawer();
 
-    getNameInput().type("  My-Wallet  ");
+    getNameInput().type("  My Wallet  ");
     getDescInput().type("  A test description  ");
 
     getCreateBtn().click();
@@ -84,7 +69,7 @@ describe("WalletCreateDrawer Component", () => {
       .its("firstCall.args.0")
       .should((payload: any) => {
         expect(payload).to.deep.equal({
-          name: "My-Wallet",
+          name: "My Wallet",
           description: "A test description",
         });
       });
@@ -93,9 +78,9 @@ describe("WalletCreateDrawer Component", () => {
   });
 
   it("shows duplicate helper text and disables Create when name exists (case-insensitive)", () => {
-    mountDrawer({ existingNames: ["My-Wallet"] });
+    mountDrawer({ existingNames: ["My Wallet"] });
 
-    getNameInput().type("my-wallet");
+    getNameInput().type("my wallet");
     getErrorHelper().should("contain.text", "Wallet name should be unique.");
     getCreateBtn().should("be.disabled");
   });

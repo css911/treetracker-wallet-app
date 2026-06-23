@@ -29,10 +29,6 @@ export interface WalletCreateDrawerProps {
   existingNames?: string[];
 }
 
-const WALLET_NAME_PATTERN = /^[A-Za-z0-9.@-]+$/;
-const WALLET_NAME_ERROR =
-  "Wallet name can only contain letters, numbers, and the - . @ symbols.";
-
 const WalletCreateDrawer: React.FC<WalletCreateDrawerProps> = ({
   open,
   onClose,
@@ -61,14 +57,9 @@ const WalletCreateDrawer: React.FC<WalletCreateDrawerProps> = ({
     return existingNames.some((n) => normalize(n) === norm);
   }, [name, existingNames]);
 
-  const trimmedName = name.trim();
-  const hasInvalidName = Boolean(
-    trimmedName && !WALLET_NAME_PATTERN.test(trimmedName),
-  );
-
   const handleCreate = () => {
-    if (!trimmedName || isDuplicate || hasInvalidName) return;
-    onCreate({ name: trimmedName, description: description.trim() });
+    if (!name.trim() || isDuplicate) return;
+    onCreate({ name: name.trim(), description: description.trim() });
     onClose();
   };
 
@@ -131,13 +122,9 @@ const WalletCreateDrawer: React.FC<WalletCreateDrawerProps> = ({
               setName(e.target.value)
             }
             testId="wallet-create-name"
-            error={Boolean(trimmedName && (isDuplicate || hasInvalidName))}
+            error={Boolean(name.trim() && isDuplicate)}
             helperText={
-              hasInvalidName
-                ? WALLET_NAME_ERROR
-                : isDuplicate
-                  ? "Wallet name should be unique."
-                  : undefined
+              isDuplicate ? "Wallet name should be unique." : undefined
             }
           />
 
@@ -157,7 +144,7 @@ const WalletCreateDrawer: React.FC<WalletCreateDrawerProps> = ({
             fullWidth
             size="large"
             variant="contained"
-            disabled={!trimmedName || isDuplicate || hasInvalidName}
+            disabled={!name.trim() || isDuplicate}
             onClick={handleCreate}
             sx={{
               mt: 1.5,
