@@ -29,6 +29,10 @@ export interface WalletCreateDrawerProps {
   existingNames?: string[];
 }
 
+const WALLET_NAME_PATTERN = /^[A-Za-z0-9.@-]+$/;
+const WALLET_NAME_ERROR =
+  "Wallet name can only contain letters, numbers, and the - . @ symbols.";
+
 const WalletCreateDrawer: React.FC<WalletCreateDrawerProps> = ({
   open,
   onClose,
@@ -54,12 +58,17 @@ const WalletCreateDrawer: React.FC<WalletCreateDrawerProps> = ({
   const isDuplicate = useMemo(() => {
     if (!name.trim()) return false;
     const norm = normalize(name);
-    return existingNames.some(n => normalize(n) === norm);
+    return existingNames.some((n) => normalize(n) === norm);
   }, [name, existingNames]);
 
+  const trimmedName = name.trim();
+  const hasInvalidName = Boolean(
+    trimmedName && !WALLET_NAME_PATTERN.test(trimmedName),
+  );
+
   const handleCreate = () => {
-    if (!name.trim() || isDuplicate) return;
-    onCreate({ name: name.trim(), description: description.trim() });
+    if (!trimmedName || isDuplicate || hasInvalidName) return;
+    onCreate({ name: trimmedName, description: description.trim() });
     onClose();
   };
 
@@ -96,12 +105,14 @@ const WalletCreateDrawer: React.FC<WalletCreateDrawerProps> = ({
             mx: "auto",
             width: "100%",
           },
-        }}>
+        }}
+      >
         <Box sx={{ p: 2.5, pb: 1.5, display: "flex", alignItems: "center" }}>
           <Typography
             id="wallet-create-drawer-title"
             variant="h6"
-            sx={{ fontWeight: 600, flex: 1, letterSpacing: 0.2 }}>
+            sx={{ fontWeight: 600, flex: 1, letterSpacing: 0.2 }}
+          >
             Provide wallet details
           </Typography>
           <IconButton aria-label="close" onClick={handleCloseRequest}>
@@ -120,9 +131,13 @@ const WalletCreateDrawer: React.FC<WalletCreateDrawerProps> = ({
               setName(e.target.value)
             }
             testId="wallet-create-name"
-            error={Boolean(name.trim() && isDuplicate)}
+            error={Boolean(trimmedName && (isDuplicate || hasInvalidName))}
             helperText={
-              isDuplicate ? "Wallet name should be unique." : undefined
+              hasInvalidName
+                ? WALLET_NAME_ERROR
+                : isDuplicate
+                  ? "Wallet name should be unique."
+                  : undefined
             }
           />
 
@@ -142,13 +157,14 @@ const WalletCreateDrawer: React.FC<WalletCreateDrawerProps> = ({
             fullWidth
             size="large"
             variant="contained"
-            disabled={!name.trim() || isDuplicate}
+            disabled={!trimmedName || isDuplicate || hasInvalidName}
             onClick={handleCreate}
             sx={{
               mt: 1.5,
               ":disabled": { backgroundColor: "#E0E0E0", color: "#9E9E9E" },
               textTransform: "uppercase",
-            }}>
+            }}
+          >
             Create Wallet
           </Button>
         </Box>
@@ -157,7 +173,8 @@ const WalletCreateDrawer: React.FC<WalletCreateDrawerProps> = ({
       <Dialog
         open={confirmOpen}
         onClose={handleKeep}
-        aria-labelledby="discard-dialog-title">
+        aria-labelledby="discard-dialog-title"
+      >
         <DialogTitle id="discard-dialog-title" sx={{ fontWeight: 600 }}>
           Discard changes?
         </DialogTitle>
@@ -174,7 +191,8 @@ const WalletCreateDrawer: React.FC<WalletCreateDrawerProps> = ({
             onClick={handleDiscard}
             variant="outlined"
             color="error"
-            sx={{ fontWeight: 600 }}>
+            sx={{ fontWeight: 600 }}
+          >
             DISCARD
           </Button>
         </DialogActions>
